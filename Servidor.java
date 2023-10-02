@@ -1,17 +1,25 @@
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 // import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Servidor {
     private static final int PORTA = 12345;
+    private static String logFileName;
     private final ConcurrentHashMap<String, PrintWriter> clientes = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Date> horarioLogin = new ConcurrentHashMap<>();
+
+     public Servidor() {
+        logFileName = "LOG-" + this.dataHorinha()  + ".txt";
+    }
 
     public static void main(String[] args) {
         System.out.println("Servidor iniciado. Aguardando conexões...");
         Servidor servidor = new Servidor();
+        servidor.criaLog(logFileName);
 
         try (ServerSocket serverSocket = new ServerSocket(PORTA)) {
             while (true) {
@@ -44,7 +52,44 @@ public class Servidor {
         }
     }
 
-    // public void enviarArquivoParaCliente(String destinatario, String remetente, String caminhoArquivo) {
+    public void enviarMensagemParaTodos(String mensagem) {
+        for (PrintWriter cliente : clientes.values()) {
+            cliente.println(mensagem);
+        }
+    }
+
+    public List<String> getClientesConectados() {
+        return new ArrayList<>(clientes.keySet());
+    }
+
+    public String dataHorinha() {
+        Date date = new Date();
+        LocalDate formatDate = LocalDate.now();
+        SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm");
+        String time = formatTime.format(date);
+        return formatDate + "-" + time;
+    }
+
+    private void criaLog(String logFileName) {
+        try {
+            File logsDirectory = new File("logs");
+            if (!logsDirectory.exists()) {
+                logsDirectory.mkdir();
+            }           
+
+            File arquivo = new File(logsDirectory, logFileName);
+            arquivo.createNewFile();
+
+        } catch (IOException e) {
+            System.err.println("Erro ao criar o arquivo de log: " + e.getMessage());
+        }
+    }
+
+	public String getLogFileName() {
+        return logFileName;
+	}
+
+        // public void enviarArquivoParaCliente(String destinatario, String remetente, String caminhoArquivo) {
     //     PrintWriter cliente = clientes.get(destinatario);
     //     if (cliente != null) {
     //         try {
@@ -70,17 +115,7 @@ public class Servidor {
     //     }
     // }
 
-    public void enviarMensagemParaTodos(String mensagem) {
-        for (PrintWriter cliente : clientes.values()) {
-            cliente.println(mensagem);
-        }
-    }
-
-    public List<String> getClientesConectados() {
-        return new ArrayList<>(clientes.keySet());
-    }
-
-    // private static void sendFile(String path) throws Exception{
+        // private static void sendFile(String path) throws Exception{
     //     int bytes = 0;
     //     File file = new File(path);
     //     FileInputStream fileInputStream = new FileInputStream(file);

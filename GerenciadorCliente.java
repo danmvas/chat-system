@@ -35,9 +35,9 @@ public class GerenciadorCliente extends Thread {
                 } else if (mensagem.startsWith("/f")) {
                     String[] partes = mensagem.split(" ", 4);
                     if (partes.length == 4) {
-                        String destinatario = partes[2];
-                        String caminhoArquivo = partes[3];
-                        servidor.enviarArquivoParaCliente(destinatario, nomeCliente, caminhoArquivo);
+                        // String destinatario = partes[2];
+                        // String caminhoArquivo = partes[3];
+                        // servidor.enviarArquivoParaCliente(destinatario, nomeCliente, caminhoArquivo);
                     }
                 } else if (mensagem.equals("/sair")) {
                     servidor.removerCliente(nomeCliente);
@@ -48,6 +48,8 @@ public class GerenciadorCliente extends Thread {
             }
         } catch (IOException e) {
             System.err.println("Erro na comunicação com o cliente: " + e.getMessage());
+            servidor.removerCliente(nomeCliente);
+            System.exit(0);
         } finally {
             try {
                 socket.close();
@@ -57,12 +59,12 @@ public class GerenciadorCliente extends Thread {
         }
     }
 
-    void receiveFile(String newFileName){
-        byte[] buffer = new byte[Integer.MAX_VALUE];
-        int bytes = dataInputStream.read(buffer,0,buffer.length);
-        fileOutputStream = new FileOutputStream(newFileName);
-        fileOutputStream.write(buffer,0,bytes);
-    }
+    // void receiveFile(String newFileName){
+    //     byte[] buffer = new byte[Integer.MAX_VALUE];
+    //     int bytes = dataInputStream.read(buffer,0,buffer.length);
+    //     fileOutputStream = new FileOutputStream(newFileName);
+    //     fileOutputStream.write(buffer,0,bytes);
+    // }
 
     private void solicitarLogin() throws IOException {
         // PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
@@ -75,7 +77,7 @@ public class GerenciadorCliente extends Thread {
         // pw.println("Login bem-sucedido! Você está conectado como " + nomeCliente);
         System.out.println("(" + horinha() + ") " + nomeCliente + " entrou no chat. IP: " + ipzinho());
 
-        criaLog();
+        updateLog();
     }
 
     public String horinha() {
@@ -90,20 +92,24 @@ public class GerenciadorCliente extends Thread {
         return ip;
     }
 
-     private void criaLog(){
-        try {
-            File arquivo = new File("log.txt");
-            if (!arquivo.exists()) {
-                arquivo.createNewFile();
+     private void updateLog() {
+        // Verifique se o servidor possui um nome de arquivo de log válido
+        String logFileName = servidor.getLogFileName();
+        if (logFileName != null) {
+            try {
+                File logsDirectory = new File("logs");
+                File arquivo = new File(logsDirectory, logFileName);
+
+                FileWriter fw = new FileWriter(arquivo, true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write("(" + horinha() + ") " + nomeCliente + " entrou no chat. IP: " + ipzinho());
+                bw.newLine();
+                bw.close();
+                fw.close();
+            } catch (IOException e) {
+                System.err.println("Erro ao atualizar o arquivo de log: " + e.getMessage());
             }
-            FileWriter fw = new FileWriter(arquivo, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write("(" + horinha() + ") " + nomeCliente + " entrou no chat. IP: " + ipzinho());
-            bw.newLine();
-            bw.close();
-            fw.close();
-        } catch (IOException e) {
-            System.err.println("Erro ao criar o arquivo de log: " + e.getMessage());
         }
     }
+
 }

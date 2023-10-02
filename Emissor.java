@@ -1,6 +1,9 @@
 // import java.io.File;
 // import java.io.FileInputStream;
+// import java.io.File;
+// import java.io.FileInputStream;
 import java.io.IOException;
+// import java.io.OutputStream;
 // import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -17,8 +20,17 @@ public class Emissor implements Runnable {
 
     public void run() {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Por favor, insira seu nome de login: ");
-            escritor.println(scanner.nextLine());
+            
+            String name = "";
+            do {
+                System.out.println("Por favor, insira seu nome de login: ");
+                name = scanner.nextLine();
+            } while (name.isEmpty());
+            escritor.println(name);
+
+            // while (name.isNull()) {
+            //     System.out.println("Nome de login inválido.");
+            // }
             
             String mensagem;
             while (true) {
@@ -26,9 +38,9 @@ public class Emissor implements Runnable {
                 
                 if (mensagem.startsWith("/f", 0)) {
                     // danhan minha heroína manda arquivo
-                    // String[] partes = mensagem.split(" ", 3);
-                    // String destinatario = partes[1];
-                    // String caminhoArquivo = partes[2];
+                    String[] partes = mensagem.split(" ", 3);
+                    String destinatario = partes[1];
+                    String caminhoArquivo = partes[2];
                     // enviarArquivo(destinatario, caminhoArquivo);
                 } else if (mensagem.startsWith("/sair")) {
                     desconectarCliente();
@@ -38,7 +50,7 @@ public class Emissor implements Runnable {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Erro na comunicação com o cliente: " + e.getMessage());
+            System.err.println("Erro na comunicação com o servidor: " + e.getMessage());
         } finally {
             desconectarCliente();
         }
@@ -64,6 +76,25 @@ public class Emissor implements Runnable {
     //     byte[] buffer = new byte[4096];  // it's a common practice to use a buffer size of 4096
     //     FileInputStream fileInputStream = new FileInputStream(caminhoArquivo);
     //     OutputStream socketOutputStream = socket.getOutputStream();  // assuming socket is your Socket instance
+
+    //     int bytesRead;
+    //     while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+    //         socketOutputStream.write(buffer, 0, bytesRead);
+    //     }
+
+    //     socketOutputStream.flush();  // make sure all bytes are written
+    //     fileInputStream.close();  // don't forget to close your file stream
+    // }
+
+    // void enviarArquivo(String destinatario, String caminhoArquivo) throws IOException {
+    //     byte[] buffer = new byte[4096];  
+    //     File file = new File(caminhoArquivo);
+    //     FileInputStream fileInputStream = new FileInputStream(file);
+    //     OutputStream socketOutputStream = socket.getOutputStream();  
+
+    //     // write file length into the stream
+    //     long fileSize = file.length();
+    //     escritor.println(Long.toString(fileSize));
 
     //     int bytesRead;
     //     while ((bytesRead = fileInputStream.read(buffer)) != -1) {

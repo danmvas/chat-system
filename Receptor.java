@@ -21,7 +21,9 @@ public class Receptor implements Runnable {
                 System.out.println("(" + time + ") " + mensagem);
             }
         } catch (IOException e) {
+            System.out.println("cu");
             System.err.println("Erro na comunicação com o servidor: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

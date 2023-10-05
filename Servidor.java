@@ -37,10 +37,11 @@ public class Servidor {
         enviarMensagemParaTodos(nome + " entrou no chat.");
     }
 
-    public void removerCliente(String nome) {
+    public void removerCliente(String nome, String ip) {
         clientes.remove(nome);
         horarioLogin.remove(nome);
         enviarMensagemParaTodos(nome + " saiu do chat.");
+        updateLog(nome + " saiu do chat. IP: " + ip);
     }
 
     public void enviarMensagemParaCliente(String destinatario, String mensagem) {
@@ -88,6 +89,34 @@ public class Servidor {
 	public String getLogFileName() {
         return logFileName;
 	}
+
+    public void updateLog(String mensagem) {
+        // Verifique se o servidor possui um nome de arquivo de log válido
+        String logFileName = getLogFileName();
+        if (logFileName != null) {
+            try {
+                File logsDirectory = new File("logs");
+                File arquivo = new File(logsDirectory, logFileName);
+
+                FileWriter fw = new FileWriter(arquivo, true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                // bw.write("(" + horinha() + ") " + nomeCliente + " entrou no chat. IP: " + ipzinho());
+                bw.write("(" + horinha() + ") " + mensagem);
+                bw.newLine();
+                bw.close();
+                fw.close();
+            } catch (IOException e) {
+                System.err.println("Erro ao atualizar o arquivo de log: " + e.getMessage());
+            }
+        }
+    }
+
+    public String horinha() {
+        Date date = new Date();
+        SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm");
+        String time = formatTime.format(date);
+        return time;
+    }
 
         // public void enviarArquivoParaCliente(String destinatario, String remetente, String caminhoArquivo) {
     //     PrintWriter cliente = clientes.get(destinatario);

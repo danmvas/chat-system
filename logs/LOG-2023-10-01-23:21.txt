@@ -1,0 +1,7 @@
+(23:21) michels entrou no chat. IP: 127.0.0.1
+(23:22) dan entrou no chat. IP: 127.0.0.1
+(23:22) michels saiu do chat. IP: 127.0.0.1
+(23:22) michele entrou no chat. IP: 127.0.0.1
+(23:24) a entrou no chat. IP: 127.0.0.1
+(23:24) a saiu do chat. IP: 127.0.0.1
+(23:24) alo entrou no chat. IP: 127.0.0.1

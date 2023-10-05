@@ -35,12 +35,15 @@ public class GerenciadorCliente extends Thread {
                 } else if (mensagem.startsWith("/f")) {
                     String[] partes = mensagem.split(" ", 4);
                     if (partes.length == 4) {
-                        // String destinatario = partes[2];
-                        // String caminhoArquivo = partes[3];
-                        // servidor.enviarArquivoParaCliente(destinatario, nomeCliente, caminhoArquivo);
+                        String destinatario = partes[1];
+                        String caminhoArquivo = partes[2];
+                        long tamanhoArquivo = Long.parseLong(partes[3]);
+                        String remetente = nomeCliente;
+
+                        receberArquivo(destinatario, remetente, caminhoArquivo, tamanhoArquivo, socket);
                     }
                 } else if (mensagem.equals("/sair")) {
-                    servidor.removerCliente(nomeCliente);
+                    servidor.removerCliente(nomeCliente, ipzinho());
                     System.out.println(nomeCliente + " saiu do chat.");
                     System.out.println("(" + horinha() + ") " + nomeCliente + " saiu no chat");
                     break;
@@ -48,7 +51,7 @@ public class GerenciadorCliente extends Thread {
             }
         } catch (IOException e) {
             System.err.println("Erro na comunicação com o cliente: " + e.getMessage());
-            servidor.removerCliente(nomeCliente);
+            servidor.removerCliente(nomeCliente, ipzinho());
             System.exit(0);
         } finally {
             try {
@@ -77,7 +80,7 @@ public class GerenciadorCliente extends Thread {
         // pw.println("Login bem-sucedido! Você está conectado como " + nomeCliente);
         System.out.println("(" + horinha() + ") " + nomeCliente + " entrou no chat. IP: " + ipzinho());
 
-        updateLog();
+        servidor.updateLog(nomeCliente + " entrou no chat. IP: " + ipzinho());
     }
 
     public String horinha() {
@@ -92,24 +95,79 @@ public class GerenciadorCliente extends Thread {
         return ip;
     }
 
-     private void updateLog() {
-        // Verifique se o servidor possui um nome de arquivo de log válido
-        String logFileName = servidor.getLogFileName();
-        if (logFileName != null) {
-            try {
-                File logsDirectory = new File("logs");
-                File arquivo = new File(logsDirectory, logFileName);
+    // private void receberArquivo(String destinatario, String remetente, String nomeArquivo, long tamanhoArquivo, Socket socket) {
+    //     try {
+    //         System.out.println("tamo indo");
+    //         String pathPadrao = "./serverFiles/";
+    //         File arquivo = new File(pathPadrao + nomeArquivo);
+    //         FileOutputStream fileOutputStream = new FileOutputStream(arquivo);
+    //         InputStream socketInputStream = socket.getInputStream();
+    //         byte[] buffer = new byte[4096];
+    //         int bytesRead = 0;
+    //         long bytesReceived = 0;
+    //         System.out.println("to aqui");
+    //         while (bytesReceived < tamanhoArquivo && (bytesRead = socketInputStream.read(buffer)) != -1) {
+    //             System.out.println("entrei");
+    //             bytesRead = socketInputStream.read(buffer);
+    //             fileOutputStream.write(buffer,0,bytesRead);
+    //             bytesReceived += bytesRead;
+    //         }
+    //         fileOutputStream.close();
+    //         System.out.println("Arquivo " + arquivo.getName() + " recebido de " + remetente);
+    //     } catch (IOException e) {
+    //         System.err.println("Erro ao receber o arquivo: " + e.getMessage());
+    //         System.out.println(e.getStackTrace());
+    //     }
+    // }
 
-                FileWriter fw = new FileWriter(arquivo, true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write("(" + horinha() + ") " + nomeCliente + " entrou no chat. IP: " + ipzinho());
-                bw.newLine();
-                bw.close();
-                fw.close();
-            } catch (IOException e) {
-                System.err.println("Erro ao atualizar o arquivo de log: " + e.getMessage());
+    private void receberArquivo(String destinatario, String remetente, String nomeArquivo, long tamanhoArquivo, Socket socket) {
+        try {
+            System.out.println("tamo indo");
+            String diretorioPath = "./serverFiles/";
+            File directory = new File(diretorioPath);
+            if (!directory.exists()) {
+                directory.mkdirs();  // Create the directory if it does not exist
             }
+            
+            File arquivo = new File(diretorioPath + nomeArquivo);
+            FileOutputStream fileOutputStream = new FileOutputStream(arquivo);
+            
+            InputStream socketInputStream = socket.getInputStream();
+            byte[] buffer = new byte[4096];
+            int bytesRead = 0;
+            long bytesReceived = 0;
+            System.out.println("to aqui");
+            while (bytesReceived < tamanhoArquivo && (bytesRead = socketInputStream.read(buffer)) != -1) {
+                System.out.println("entrei");
+                fileOutputStream.write(buffer, 0, bytesRead);
+                bytesReceived += bytesRead;
+            }
+            fileOutputStream.close();
+            System.out.println("Arquivo " + arquivo.getName() + " recebido de " + remetente);
+        } catch (IOException e) {
+            System.err.println("Erro ao receber o arquivo: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+    // private void updateLog() {
+    //     // Verifique se o servidor possui um nome de arquivo de log válido
+    //     String logFileName = servidor.getLogFileName();
+    //     if (logFileName != null) {
+    //         try {
+    //             File logsDirectory = new File("logs");
+    //             File arquivo = new File(logsDirectory, logFileName);
+
+    //             FileWriter fw = new FileWriter(arquivo, true);
+    //             BufferedWriter bw = new BufferedWriter(fw);
+    //             bw.write("(" + horinha() + ") " + nomeCliente + " entrou no chat. IP: " + ipzinho());
+    //             bw.newLine();
+    //             bw.close();
+    //             fw.close();
+    //         } catch (IOException e) {
+    //             System.err.println("Erro ao atualizar o arquivo de log: " + e.getMessage());
+    //         }
+    //     }
+    // }
 
 }

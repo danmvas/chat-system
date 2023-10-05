@@ -1,20 +1,22 @@
 // import java.io.File;
 // import java.io.FileInputStream;
-// import java.io.File;
-// import java.io.FileInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-// import java.io.OutputStream;
+import java.io.OutputStream;
 // import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Emissor implements Runnable {
-    // private Socket socket;
+    private Socket socket;
     private PrintWriter escritor;
 
     public Emissor(Socket socket) throws IOException {
-        // this.socket = socket;
+        this.socket = socket;
         this.escritor = new PrintWriter(socket.getOutputStream(), true);
     }
 
@@ -41,7 +43,7 @@ public class Emissor implements Runnable {
                     String[] partes = mensagem.split(" ", 3);
                     String destinatario = partes[1];
                     String caminhoArquivo = partes[2];
-                    // enviarArquivo(destinatario, caminhoArquivo);
+                    enviarArquivo(destinatario, caminhoArquivo);
                 } else if (mensagem.startsWith("/sair")) {
                     desconectarCliente();
                     break;
@@ -50,6 +52,7 @@ public class Emissor implements Runnable {
                 }
             }
         } catch (Exception e) {
+            System.out.println("pinto");
             System.err.println("Erro na comunicação com o servidor: " + e.getMessage());
         } finally {
             desconectarCliente();
@@ -86,24 +89,50 @@ public class Emissor implements Runnable {
     //     fileInputStream.close();  // don't forget to close your file stream
     // }
 
-    // void enviarArquivo(String destinatario, String caminhoArquivo) throws IOException {
-    //     byte[] buffer = new byte[4096];  
-    //     File file = new File(caminhoArquivo);
-    //     FileInputStream fileInputStream = new FileInputStream(file);
-    //     OutputStream socketOutputStream = socket.getOutputStream();  
+    void enviarArquivo(String destinatario, String caminhoArquivo) throws IOException {
+        Path p = Paths.get(caminhoArquivo);
+        String nomeArquivo = p.getFileName().toString();
+        File file = new File(caminhoArquivo);
+        long fileSize = file.length();
 
-    //     // write file length into the stream
-    //     long fileSize = file.length();
-    //     escritor.println(Long.toString(fileSize));
+        // escritor.println("/f " + destinatario + " " + caminhoArquivo + " " + fileSize);
+        escritor.println("/f " + destinatario + " " + nomeArquivo + " " + fileSize);
 
-    //     int bytesRead;
-    //     while ((bytesRead = fileInputStream.read(buffer)) != -1) {
-    //         socketOutputStream.write(buffer, 0, bytesRead);
-    //     }
+        try (FileInputStream fileInputStream = new FileInputStream(file);
+        OutputStream socketOutputStream = socket.getOutputStream()) {
+            byte[] buffer = new byte[4096];  // it's a common practice to use a buffer size of 4096
+            int bytesRead;
+            
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                socketOutputStream.write(buffer, 0, bytesRead);
+                socketOutputStream.flush();  // make sure all bytes are written
+                // bytesRead
+            }
+            fileInputStream.close();
 
-    //     socketOutputStream.flush();  // make sure all bytes are written
-    //     fileInputStream.close();  // don't forget to close your file stream
-    // }
+        } catch (Exception e) {
+            System.err.println("Erro ao enviar arquivo: " + e.getMessage());
+        }
+
+
+
+
+        // byte[] buffer = new byte[4096];  
+        // FileInputStream fileInputStream = new FileInputStream(file);
+        // OutputStream socketOutputStream = socket.getOutputStream();  
+
+        // // write file length into the stream
+        // long fileSize = file.length();
+        // escritor.println(Long.toString(fileSize));
+
+        // int bytesRead;
+        // while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+        //     socketOutputStream.write(buffer, 0, bytesRead);
+        // }
+
+        // socketOutputStream.flush();  // make sure all bytes are written
+        // fileInputStream.close();  // don't forget to close your file stream
+    }
 
     private void desconectarCliente() {
         escritor.println("/sair");

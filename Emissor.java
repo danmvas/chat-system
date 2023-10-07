@@ -22,7 +22,7 @@ public class Emissor implements Runnable {
 
     public void run() {
         try (Scanner scanner = new Scanner(System.in)) {
-            
+
             String name = "";
             do {
                 System.out.println("Por favor, insira seu nome de login: ");
@@ -30,25 +30,25 @@ public class Emissor implements Runnable {
             } while (name.isEmpty());
             escritor.println(name);
 
-            // while (name.isNull()) {
-            //     System.out.println("Nome de login inválido.");
-            // }
-            
             String mensagem;
             while (true) {
                 mensagem = scanner.nextLine();
-                
+
                 if (mensagem.startsWith("/f", 0)) {
                     // danhan minha heroína manda arquivo
                     String[] partes = mensagem.split(" ", 3);
                     String destinatario = partes[1];
                     String caminhoArquivo = partes[2];
                     enviarArquivo(destinatario, caminhoArquivo);
+                } else if (mensagem.startsWith("/u")) {
+                    escritor.println("/u");
                 } else if (mensagem.startsWith("/sair")) {
                     desconectarCliente();
                     break;
-                } else {
-                    escritor.println(mensagem);
+                } else if (mensagem.startsWith("/m")) {
+                    if (validaMensagem(mensagem)) {
+                        escritor.println(mensagem);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -59,11 +59,22 @@ public class Emissor implements Runnable {
         }
     }
 
+    public boolean validaMensagem(String mensagem) {
+//        System.out.printf(mensagem);
+//        String[] partes = mensagem.split(" ", 3);
+//        String destinatario = partes[1];
+//        String mensagemEnviada = partes[2];
+//        if (destinatario.isEmpty() || mensagemEnviada.isEmpty()) {
+//            return false;
+//        }
+        return true;
+    }
+
     // public void enviarArquivo(String destinatario, String caminhoArquivo) {
     //     long bytes = 0;
     //     File file = new File(caminhoArquivo);
     //     FileInputStream fileInputStream = new FileInputStream(file);
-        
+
     //     // send file size
     //     escritor.writeLong(file.length());  
     //     // break file into chunks
@@ -99,10 +110,10 @@ public class Emissor implements Runnable {
         escritor.println("/f " + destinatario + " " + nomeArquivo + " " + fileSize);
 
         try (FileInputStream fileInputStream = new FileInputStream(file);
-        OutputStream socketOutputStream = socket.getOutputStream()) {
+             OutputStream socketOutputStream = socket.getOutputStream()) {
             byte[] buffer = new byte[4096];  // it's a common practice to use a buffer size of 4096
             int bytesRead;
-            
+
             while ((bytesRead = fileInputStream.read(buffer)) != -1) {
                 socketOutputStream.write(buffer, 0, bytesRead);
                 socketOutputStream.flush();  // make sure all bytes are written

@@ -12,7 +12,7 @@ public class Servidor {
     private final ConcurrentHashMap<String, PrintWriter> clientes = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Date> horarioLogin = new ConcurrentHashMap<>();
 
-     public Servidor() {
+    public Servidor() {
         logFileName = "LOG-" + this.dataHorinha()  + ".txt";
     }
 
@@ -53,6 +53,11 @@ public class Servidor {
         }
     }
 
+    public PrintWriter getClientPrintWriter(String nome) {
+        PrintWriter pw = clientes.get(nome);
+        return pw;
+    }
+
     public void enviarMensagemParaTodos(String mensagem) {
         for (PrintWriter cliente : clientes.values()) {
             cliente.println(mensagem);
@@ -76,7 +81,7 @@ public class Servidor {
             File logsDirectory = new File("logs");
             if (!logsDirectory.exists()) {
                 logsDirectory.mkdir();
-            }           
+            }
 
             File arquivo = new File(logsDirectory, logFileName);
             arquivo.createNewFile();
@@ -86,9 +91,9 @@ public class Servidor {
         }
     }
 
-	public String getLogFileName() {
+    public String getLogFileName() {
         return logFileName;
-	}
+    }
 
     public void updateLog(String mensagem) {
         // Verifique se o servidor possui um nome de arquivo de log válido
@@ -118,7 +123,7 @@ public class Servidor {
         return time;
     }
 
-        // public void enviarArquivoParaCliente(String destinatario, String remetente, String caminhoArquivo) {
+    // public void enviarArquivoParaCliente(String destinatario, String remetente, String caminhoArquivo) {
     //     PrintWriter cliente = clientes.get(destinatario);
     //     if (cliente != null) {
     //         try {
@@ -144,13 +149,13 @@ public class Servidor {
     //     }
     // }
 
-        // private static void sendFile(String path) throws Exception{
+    // private static void sendFile(String path) throws Exception{
     //     int bytes = 0;
     //     File file = new File(path);
     //     FileInputStream fileInputStream = new FileInputStream(file);
-        
+
     //     // send file size
-    //     dataOutputStream.writeLong(file.length());  
+    //     dataOutputStream.writeLong(file.length());
     //     // break file into chunks
     //     byte[] buffer = new byte[4*1024];
     //     while ((bytes=fileInputStream.read(buffer))!=-1){

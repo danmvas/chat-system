@@ -121,25 +121,36 @@ public class GerenciadorCliente extends Thread {
     // }
 
     private void receberArquivo(String destinatario, String remetente, String nomeArquivo, long tamanhoArquivo, Socket socket) {
+        // o servidor nao precisa gravar o arquivo
+        // pode redirecionar para o destinatario direto dentro do laco em que esta lendo do bufferedReader
         try {
-            System.out.println("tamo indo");
-            String diretorioPath = "./serverFiles/";
-            File directory = new File(diretorioPath);
-            if (!directory.exists()) {
-                directory.mkdirs();  // Create the directory if it does not exist
-            }
-            
-            File arquivo = new File(diretorioPath + nomeArquivo);
-            FileOutputStream fileOutputStream = new FileOutputStream(arquivo);
-            
-            InputStream socketInputStream = socket.getInputStream();
+//            System.out.println("tamo indo");
+//            String diretorioPath = "./serverFiles/";
+//            File directory = new File(diretorioPath);
+//            if (!directory.exists()) {
+//                directory.mkdirs();  // Create the directory if it does not exist
+//            }
+
+//            File arquivo = new File(diretorioPath + nomeArquivo);
+//            FileOutputStream fileOutputStream = new FileOutputStream(arquivo);
+//            System.out.println("to aqui");
+            PrintWriter escritor = servidor.getClientPrintWriter(destinatario);
+            escritor.println("/f " + remetente + " " + nomeArquivo + " " + tamanhoArquivo);
+
             byte[] buffer = new byte[4096];
             int bytesRead = 0;
             long bytesReceived = 0;
-            System.out.println("to aqui");
+            InputStream socketInputStream = socket.getInputStream();
+
+            // mudar para enviar e ler byte a byte com read()
+            // certificar-se de que o read() esteja lendo 1 byte
+            // utilizar como alternativa o metodo readNBytes
+
             while (bytesReceived < tamanhoArquivo && (bytesRead = socketInputStream.read(buffer)) != -1) {
-                System.out.println("entrei");
-                fileOutputStream.write(buffer, 0, bytesRead);
+                escritor.write
+                escritor.flush();
+//                System.out.println("entrei");
+//                fileOutputStream.write(buffer, 0, bytesRead);
                 bytesReceived += bytesRead;
             }
             fileOutputStream.close();
